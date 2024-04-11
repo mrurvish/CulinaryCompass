@@ -1,4 +1,4 @@
-package com.example.edesordo
+package com.example.culinarycompass
 
 import org.junit.Test
 

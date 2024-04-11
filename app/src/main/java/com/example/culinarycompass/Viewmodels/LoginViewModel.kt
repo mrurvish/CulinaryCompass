@@ -1,15 +1,12 @@
-package com.example.edesordo.Viewmodels
+package com.example.culinarycompass.Viewmodels
 
 import android.text.TextUtils
 import android.util.Log
 import android.util.Patterns
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.edesordo.data.Validator
+import com.example.culinarycompass.data.Validator
 
 class LoginViewModel :ViewModel(){
     private val _email = MutableLiveData<String>()

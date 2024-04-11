@@ -1,4 +1,4 @@
-package com.example.edesordo
+package com.example.culinarycompass
 
 
 import android.os.Bundle
@@ -7,12 +7,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.material3.Button
@@ -22,18 +18,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
-import com.example.edesordo.Viewmodels.HomeViewModel
-import com.example.edesordo.data.Hit
-import com.example.edesordo.data.Recipe
-import com.example.edesordo.ui.theme.EdesOrdoTheme
+import com.example.culinarycompass.Viewmodels.HomeViewModel
+import com.example.culinarycompass.data.Hit
+import com.example.culinarycompass.data.Recipe
+import com.example.culinarycompass.ui.theme.EdesOrdoTheme
 
 class HomeActivity : ComponentActivity() {
     private val viewModel by viewModels<HomeViewModel>()

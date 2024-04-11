@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.edesordo'
+    namespace 'com.example.culinarycompass'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.example.edesordo"
+        applicationId "com.example.culinarycompass"
         minSdk 28
         targetSdk 34
         versionCode 1

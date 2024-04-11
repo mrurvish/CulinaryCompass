@@ -1,4 +1,4 @@
-package com.example.edesordo.data
+package com.example.culinarycompass.data
 
 import com.squareup.moshi.Json
 

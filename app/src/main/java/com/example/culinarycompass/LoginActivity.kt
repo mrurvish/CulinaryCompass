@@ -1,9 +1,7 @@
-package com.example.edesordo
+package com.example.culinarycompass
 
 import android.content.Intent
 import android.os.Bundle
-import android.text.TextUtils
-import android.util.Patterns
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -35,7 +33,6 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,9 +50,10 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.edesordo.Viewmodels.LoginViewModel
-import com.example.edesordo.data.Validator
-import com.example.edesordo.ui.theme.EdesOrdoTheme
+import com.example.culinarycompass.Viewmodels.LoginViewModel
+import com.example.culinarycompass.ui.theme.EdesOrdoTheme
+
+
 
 class LoginActivity : ComponentActivity() {
     private val viewModel by viewModels<LoginViewModel>()

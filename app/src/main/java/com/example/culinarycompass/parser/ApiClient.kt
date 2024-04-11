@@ -1,4 +1,4 @@
-package com.example.edesordo.parser
+package com.example.culinarycompass.parser
 
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor

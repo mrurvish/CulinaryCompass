@@ -1,4 +1,4 @@
-package com.example.edesordo.ui.theme
+package com.example.culinarycompass.ui.theme
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

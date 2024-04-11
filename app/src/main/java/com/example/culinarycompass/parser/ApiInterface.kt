@@ -1,6 +1,6 @@
-package com.example.edesordo.parser
+package com.example.culinarycompass.parser
 
-import com.example.edesordo.data.SearchResult
+import com.example.culinarycompass.data.SearchResult
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Query

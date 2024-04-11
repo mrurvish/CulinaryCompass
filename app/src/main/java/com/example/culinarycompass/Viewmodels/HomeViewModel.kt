@@ -1,15 +1,12 @@
-package com.example.edesordo.Viewmodels
+package com.example.culinarycompass.Viewmodels
 
 import android.annotation.SuppressLint
-import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.edesordo.data.Hit
-import com.example.edesordo.data.Recipe
-import com.example.edesordo.data.SearchResult
-import com.example.edesordo.parser.ApiClient
+import com.example.culinarycompass.data.Hit
+import com.example.culinarycompass.data.SearchResult
+import com.example.culinarycompass.parser.ApiClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.Call

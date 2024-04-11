@@ -1,6 +1,5 @@
-package com.example.edesordo.ui.theme
+package com.example.culinarycompass.ui.theme
 
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.Color
 
 val Purple80 = Color(0xFFD0BCFF)
