@@ -5,8 +5,9 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
-class ApiClient {
+class ApiClient @Inject constructor(){
     private val CONNECTION_TIMEOUT = 30 //seconds
 
     private val READ_TIMEOUT = 20 //seconds

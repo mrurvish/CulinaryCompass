@@ -2,6 +2,7 @@ package com.example.culinarycompass
 
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -28,6 +29,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.sharp.Cancel
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,6 +40,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -59,6 +62,8 @@ import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
@@ -66,12 +71,14 @@ import com.example.culinarycompass.Viewmodels.HomeViewModel
 import com.example.culinarycompass.data.Hit
 import com.example.culinarycompass.data.Recipe
 import com.example.culinarycompass.ui.theme.EdesOrdoTheme
-
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
+@AndroidEntryPoint
 class HomeActivity : ComponentActivity() {
-    private val viewModel by viewModels<HomeViewModel>()
+    private val viewModel: HomeViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.getrecipes("pizza")
+        viewModel.getrecipes()
         setContent {
 
             EdesOrdoTheme {
@@ -81,8 +88,8 @@ class HomeActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Column {
-                        Search()
-                    displayList(viewModel = viewModel)
+                        Search(viewModel = viewModel,{viewModel.getrecipes()})
+                        displayList(viewModel = viewModel)
 
                     }
                 }
@@ -96,38 +103,69 @@ class HomeActivity : ComponentActivity() {
 
 @Composable
 fun displayList(viewModel: HomeViewModel) {
-var data : State<MutableList<Hit>?> = viewModel.recepies.observeAsState()
+val data =viewModel.recepiResponse.collectAsLazyPagingItems()
+//    Log.d("size", data?.size.toString())
     LazyVerticalStaggeredGrid(
         columns = StaggeredGridCells.Fixed(2), // 2 columns
         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
     ) {
-        items(data.value?.size?:0) { recepi ->
+        items(data?.itemCount?:0) { recepi ->
             // Composable item for each item in the list
-            data.value?.get(recepi)?.recipe?.let { itemView(recipe = it) }
+//            data?.getOrNull(recepi)?.recipe?.let { itemView(recipe = it) }
+            data[recepi]?.recipe?.let { itemView(recipe = it) }
+        }
+    }
+    data.apply {
+        when {
+            loadState.refresh is LoadState.Loading || loadState.append is LoadState.Loading -> {
+
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+
+                }
+            }
+
+            loadState.refresh is LoadState.Error || loadState.append is LoadState.Error -> {
+                    Text(text = "Error")
+
+            }
+
+            loadState.refresh is LoadState.NotLoading -> {
+            }
         }
     }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true)
 @Composable
-fun Search() {
-    var text by rememberSaveable { mutableStateOf("") }
+fun Search(viewModel: HomeViewModel,onSearch:()->Unit) {
+
+
     Row (verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceEvenly){
 
 
         SearchBar(
             modifier = Modifier,
-            query = text,
-            onQueryChange = { text = it },
-            onSearch = {},
+            query = viewModel.searchtext,
+            onQueryChange = {
+                viewModel.searchtext = it
+                            },
+            onSearch = {
+                onSearch()
+                       },
             active = false,
             onActiveChange = {},
             placeholder = { Text("search recipies") },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
             trailingIcon = {
-                if (text.isNotEmpty()) {
-                    IconButton(onClick = { text = "" }) {
+                if (viewModel.searchtext.isNotEmpty()) {
+                    IconButton(onClick = { viewModel.searchtext = "" }) {
                         Icon(
                             imageVector = Icons.Default.Close,
                             tint = MaterialTheme.colorScheme.onSurface,

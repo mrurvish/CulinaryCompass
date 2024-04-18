@@ -3,7 +3,6 @@ package com.example.culinarycompass.data
 import com.squareup.moshi.Json
 
 
-
 data class Links(
     @field:Json(name = "self") val self: Link, @field:Json(name = "next") val next: Link
 )
@@ -69,7 +68,7 @@ data class Digest(
     @field:Json(name = "daily") val daily: Double,
     @field:Json(name = "unit") val unit: String,
 
-)
+    )
 
 
 data class Recipe(
@@ -123,4 +122,14 @@ data class Hit(
 data class Error(
     @field:Json(name = "error") val error: String,
     @field:Json(name = "property") val property: String
+)
+
+data class QueryParams(
+    val search: String,
+    var diet: Array<String> = arrayOf(),
+    var health: Array<String>,
+    var cusine: Array<String>?,
+    var mealtype: Array<String>?,
+    var dishtype: Array<String>?,
+    val nextpage: String
 )
