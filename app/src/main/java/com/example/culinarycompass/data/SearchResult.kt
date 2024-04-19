@@ -88,7 +88,7 @@ data class Recipe(
     @field:Json(name = "calories") val calories: Double,
     @field:Json(name = "glycemicIndex") val glycemicIndex: Double,
     @field:Json(name = "inflammatoryIndex") val inflammatoryIndex: Double,
-    @field:Json(name = "totalCO2Emissions") val totalCO2Emissions: Double,
+   // @field:Json(name = "totalCO2Emissions") val totalCO2Emissions: Double,
     @field:Json(name = "co2EmissionsClass") val co2EmissionsClass: String,
     @field:Json(name = "totalWeight") val totalWeight: Double,
     @field:Json(name = "cuisineType") val cuisineType: List<String>,

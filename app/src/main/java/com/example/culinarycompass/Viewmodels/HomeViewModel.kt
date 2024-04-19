@@ -49,7 +49,7 @@ fun getrecipes()
 {
 
     viewModelScope.launch {
-        val queryParams = QueryParams(search = searchtext, diet = arrayOf(), health = arrayOf(),cusine = arrayOf(),mealtype = arrayOf(),dishtype = arrayOf(), nextpage = "")
+        val queryParams = QueryParams(search = searchtext, diet = arrayOf(), health = arrayOf(),cusine = arrayOf("Asian"),mealtype = arrayOf(),dishtype = arrayOf(), nextpage = "")
         val pagingSource = SearchResultPagingSource(searchResultRepository, queryParams)
         val pagingData = Pager(
             config = PagingConfig(pageSize = PAGE_SIZE),

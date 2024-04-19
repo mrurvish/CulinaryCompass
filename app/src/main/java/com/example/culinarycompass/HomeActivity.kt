@@ -109,16 +109,16 @@ val data =viewModel.recepiResponse.collectAsLazyPagingItems()
         columns = StaggeredGridCells.Fixed(2), // 2 columns
         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
     ) {
-        items(data?.itemCount?:0) { recepi ->
+        items(data?.itemCount ?: 0) { recepi ->
             // Composable item for each item in the list
 //            data?.getOrNull(recepi)?.recipe?.let { itemView(recipe = it) }
             data[recepi]?.recipe?.let { itemView(recipe = it) }
         }
-    }
-    data.apply {
-        when {
-            loadState.refresh is LoadState.Loading || loadState.append is LoadState.Loading -> {
 
+        data.apply {
+            when {
+                loadState.refresh is LoadState.Loading || loadState.append is LoadState.Loading -> {
+                    item {
                     Box(
                         modifier = Modifier.fillMaxWidth(),
                         contentAlignment = Alignment.Center
@@ -127,15 +127,18 @@ val data =viewModel.recepiResponse.collectAsLazyPagingItems()
                             modifier = Modifier.align(Alignment.Center)
                         )
 
+                    }
                 }
-            }
+                }
 
-            loadState.refresh is LoadState.Error || loadState.append is LoadState.Error -> {
-                    Text(text = "Error")
+                loadState.refresh is LoadState.Error || loadState.append is LoadState.Error -> {
+                    item {
+                        Text(text = "Error")
+                    }
+                }
 
-            }
-
-            loadState.refresh is LoadState.NotLoading -> {
+                loadState.refresh is LoadState.NotLoading -> {
+                }
             }
         }
     }
