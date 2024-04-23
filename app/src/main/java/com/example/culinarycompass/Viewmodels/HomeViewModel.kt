@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.nfc.tech.MifareUltralight.PAGE_SIZE
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -43,6 +44,7 @@ class HomeViewModel @Inject constructor(
         private set
 
     var searchtext by mutableStateOf("pizza")
+    var showBottomSheet by mutableStateOf(false)
 
 @SuppressLint("SuspiciousIndentation")
 fun getrecipes()
