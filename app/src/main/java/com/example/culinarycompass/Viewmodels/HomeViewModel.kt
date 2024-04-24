@@ -35,9 +35,12 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val searchResultRepository: SearchResultRepository
 ):ViewModel() {
- /*  private val _recepies = MutableLiveData<MutableList<Hit>>()
-    val recepies: LiveData<MutableList<Hit>> = _recepies*/
 
+var diet :MutableList<String> = mutableListOf()
+    var health :MutableList<String> = mutableListOf()
+    var mealtype :MutableList<String> = mutableListOf()
+    var cusintype :MutableList<String> = mutableListOf()
+    var dishtype :MutableList<String> = mutableListOf()
     private val _recipiresponse: MutableStateFlow<PagingData<Hit>> =
         MutableStateFlow(PagingData.empty())
     var recepiResponse = _recipiresponse.asStateFlow()
@@ -51,7 +54,7 @@ fun getrecipes()
 {
 
     viewModelScope.launch {
-        val queryParams = QueryParams(search = searchtext, diet = arrayOf(), health = arrayOf(),cusine = arrayOf("Asian"),mealtype = arrayOf(),dishtype = arrayOf(), nextpage = "")
+        val queryParams = QueryParams(search = searchtext, diet = diet.toTypedArray(), health = health.toTypedArray(),cusine = cusintype.toTypedArray(),mealtype = mealtype.toTypedArray(),dishtype =dishtype.toTypedArray(), nextpage = "")
         val pagingSource = SearchResultPagingSource(searchResultRepository, queryParams)
         val pagingData = Pager(
             config = PagingConfig(pageSize = PAGE_SIZE),

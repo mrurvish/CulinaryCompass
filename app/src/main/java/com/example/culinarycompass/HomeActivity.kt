@@ -5,28 +5,35 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.staggeredgrid.LazyHorizontalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedFilterChip
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -37,7 +44,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,6 +58,7 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
@@ -54,7 +67,9 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.placeholder
 import com.example.culinarycompass.Viewmodels.HomeViewModel
+import com.example.culinarycompass.data.ApiParams
 import com.example.culinarycompass.data.Recipe
+import com.example.culinarycompass.data.SearchResult
 import com.example.culinarycompass.ui.theme.EdesOrdoTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -72,7 +87,7 @@ class HomeActivity : ComponentActivity() {
             EdesOrdoTheme {
 
 
-                    Bottomsheet(viewModel)
+                Bottomsheet(viewModel)
 
 
             }
@@ -83,7 +98,7 @@ class HomeActivity : ComponentActivity() {
 }
 
 @Composable
-fun MyApp(viewModel: HomeViewModel,onFilter: () -> Unit) {
+fun MyApp(viewModel: HomeViewModel, onFilter: () -> Unit) {
     // A surface container using the 'background' color from the theme
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -91,7 +106,7 @@ fun MyApp(viewModel: HomeViewModel,onFilter: () -> Unit) {
     ) {
         Column {
             Search(viewModel = viewModel, { viewModel.getrecipes() }, onFilter = { onFilter() })
-            displayList(viewModel = viewModel)
+            DisplayList(viewModel = viewModel)
 
         }
     }
@@ -100,43 +115,245 @@ fun MyApp(viewModel: HomeViewModel,onFilter: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Bottomsheet(viewModel: HomeViewModel) {
-    val bottomSheetState = rememberBottomSheetScaffoldState(bottomSheetState = SheetState(initialValue = SheetValue.Hidden, skipPartiallyExpanded = true))
+    val bottomSheetState = rememberBottomSheetScaffoldState(
+        bottomSheetState = SheetState(
+            initialValue = SheetValue.Hidden,
+            skipPartiallyExpanded = true
+        )
+    )
     val scop = rememberCoroutineScope()
+
+
+
     BottomSheetScaffold(
         scaffoldState = bottomSheetState,
         sheetContent = {
-        BottomsheetContent {
-            scop.launch {
-                bottomSheetState.bottomSheetState.hide()
+            BottomsheetContent(viewModel) {
+                scop.launch {
+                    bottomSheetState.bottomSheetState.hide()
+                }
             }
-        }
-    }, sheetPeekHeight = 0.dp) {
+        }, sheetPeekHeight = 0.dp
+    ) {
         MyApp(viewModel, onFilter = {
             scop.launch {
                 bottomSheetState.bottomSheetState.expand()
             }
         })
     }
-
+    /*  LaunchedEffect(bottomSheetState) {
+          snapshotFlow { bottomSheetState.bottomSheetState.isVisible }.collect { isVisible ->
+              if (isVisible) {
+                  // Sheet is visible
+              } else {
+                  viewModel.getrecipes()
+              }
+          }
+      }*/
 }
 
+
 @Composable
-fun BottomsheetContent(OnDismiss: () -> Unit) {
-    Box(modifier = Modifier.fillMaxWidth().height(300.dp)) {
-        Icon(
-            Icons.Default.Close,
-            contentDescription = null,
+fun BottomsheetContent(viewModel: HomeViewModel, OnDismiss: () -> Unit = {}) {
+    val selecteddiet: MutableState<List<String>> = remember {
+        mutableStateOf(listOf())
+    }
+    val selectedhealth: MutableState<List<String>> = remember {
+        mutableStateOf(listOf())
+    }
+    val selectedcusintype: MutableState<List<String>> = remember {
+        mutableStateOf(listOf())
+    }
+    val selectedmealtype: MutableState<List<String>> = remember {
+        mutableStateOf(listOf())
+    }
+    val selecteddishtype: MutableState<List<String>> = remember {
+        mutableStateOf(listOf())
+    }
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+            Icon(
+                Icons.Default.Close,
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(10.dp)
+                    .size(25.dp)
+                    .clickable { OnDismiss() },
+            )
+        }
+Spacer(modifier = Modifier.size(4.dp))
+        Text(text = "Meal :")
+        ChipGroupitemview(ApiParams().meals, onChipDisselected = {
+
+            val oldlist = selectedmealtype.value.toMutableList()
+            oldlist.remove(it)
+            selectedmealtype.value = oldlist
+        }, onChipSelected = {
+
+            val oldlist = selectedmealtype.value.toMutableList()
+            oldlist.add(it)
+            selectedmealtype.value = oldlist
+        }, selectedchips = selectedmealtype)
+        Spacer(modifier = Modifier.size(4.dp))
+            Text(text = "Diet :")
+            ChipGroupitemview(ApiParams().diet, onChipDisselected = {
+
+                val oldlist = selecteddiet.value.toMutableList()
+                oldlist.remove(it)
+                selecteddiet.value = oldlist
+            }, onChipSelected = {
+
+                val oldlist = selecteddiet.value.toMutableList()
+                oldlist.add(it)
+                selecteddiet.value = oldlist
+            }, selectedchips = selecteddiet)
+
+        Spacer(modifier = Modifier.size(4.dp))
+        Text(text = "Cuisine :")
+        ChipGroupitemview(ApiParams().cuisineTypes, onChipDisselected = {
+
+            val oldlist = selectedcusintype.value.toMutableList()
+            oldlist.remove(it)
+            selectedcusintype.value = oldlist
+        }, onChipSelected = {
+
+            val oldlist = selectedcusintype.value.toMutableList()
+            oldlist.add(it)
+            selectedcusintype.value = oldlist
+        }, selectedchips = selectedcusintype)
+        Spacer(modifier = Modifier.size(4.dp))
+        Text(text = "Dish :")
+        ChipGroupitemview(ApiParams().dishTypes, onChipDisselected = {
+
+            val oldlist = selecteddishtype.value.toMutableList()
+            oldlist.remove(it)
+            selecteddishtype.value = oldlist
+        }, onChipSelected = {
+
+            val oldlist = selecteddishtype.value.toMutableList()
+            oldlist.add(it)
+            selecteddishtype.value = oldlist
+        }, selectedchips = selecteddishtype)
+        Spacer(modifier = Modifier.size(4.dp))
+        Text(text = "Health Labels :")
+        ChipGroupitemview(ApiParams().health, onChipDisselected = {
+
+            val oldlist = selectedhealth.value.toMutableList()
+            oldlist.remove(it)
+            selectedhealth.value = oldlist
+        }, onChipSelected = {
+
+            val oldlist = selectedhealth.value.toMutableList()
+            oldlist.add(it)
+            selectedhealth.value = oldlist
+        }, selectedchips = selectedhealth)
+        Spacer(modifier = Modifier.size(4.dp))
+        Row(
             modifier = Modifier
-                .padding(10.dp)
-                .size(25.dp)
-                .clickable { OnDismiss() }
-                .align(Alignment.TopEnd))
-        Text(text = "hello bottom sheet", modifier = Modifier.align(Alignment.Center))
+                .align(Alignment.Start)
+                .fillMaxWidth().padding(4.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Button(onClick = {
+                selecteddiet.value = listOf()
+                selectedcusintype.value = listOf()
+                selectedmealtype.value = listOf()
+                selecteddishtype.value = listOf()
+                selectedhealth.value = listOf()
+                viewModel.diet.clear()
+                viewModel.cusintype.clear()
+                viewModel.mealtype.clear()
+                viewModel.health.clear()
+                viewModel.dishtype.clear()
+                OnDismiss()
+
+            }) {
+                Text(text = "Clear")
+            }
+            Button(onClick = {
+                viewModel.diet = selecteddiet.value.toMutableList()
+                viewModel.cusintype = selectedcusintype.value.toMutableList()
+                viewModel.mealtype = selectedmealtype.value.toMutableList()
+                viewModel.dishtype = selecteddishtype.value.toMutableList()
+                viewModel.health = selectedhealth.value.toMutableList()
+                viewModel.getrecipes()
+                OnDismiss()
+            }) {
+                Text(text = "Apply")
+            }
+        }
+
+    }
+}
+/*@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FilterChipExample() {
+    var selected by remember { mutableStateOf(false) }
+    ElevatedFilterChip(
+        selected = selected,
+        onClick = { selected = !selected },
+        label = { Text("Filter chip") },
+        leadingIcon = if (selected) {
+            {
+                Icon(
+                    imageVector = Icons.Filled.Done,
+                    contentDescription = "Localized Description",
+                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                )
+            }
+        } else {
+            null
+        }
+    )
+}*/
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ChipGroupitemview(
+    apiparams: List<String>, onChipSelected: (String) -> Unit,
+    onChipDisselected: (String) -> Unit,
+    selectedchips: MutableState<List<String>>
+) {
+
+    LazyHorizontalStaggeredGrid(
+        rows = StaggeredGridCells.Adaptive(20.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(60.dp),
+        contentPadding = PaddingValues(vertical = 1.dp, horizontal = 2.dp)
+    ) {
+        items(apiparams) {
+            ElevatedFilterChip(
+                modifier = Modifier.padding(2.dp),
+                selected = selectedchips.value.contains(it),
+                onClick = {
+                    if (!selectedchips.value.contains(it)) {
+                        onChipSelected(it)
+
+                    } else {
+                        onChipDisselected(it)
+                    }
+                },
+                label = { Text(it, maxLines = 1) },
+                leadingIcon = if (selectedchips.value.contains(it)) {
+                    {
+                        Icon(
+                            imageVector = Icons.Filled.Done,
+                            contentDescription = "Localized Description",
+                            modifier = Modifier.size(FilterChipDefaults.IconSize)
+                        )
+                    }
+                } else {
+                    null
+                }
+            )
+        }
     }
 }
 
 @Composable
-fun displayList(viewModel: HomeViewModel) {
+fun DisplayList(viewModel: HomeViewModel) {
 
     val data = viewModel.recepiResponse.collectAsLazyPagingItems()
 //    Log.d("size", data?.size.toString())
@@ -153,7 +370,7 @@ fun displayList(viewModel: HomeViewModel) {
         data.apply {
             when {
                 loadState.refresh is LoadState.Loading || loadState.append is LoadState.Loading -> {
-                    item {
+                    item(span = StaggeredGridItemSpan.FullLine) {
                         Box(
                             modifier = Modifier.fillMaxWidth(),
                             contentAlignment = Alignment.Center
@@ -167,7 +384,7 @@ fun displayList(viewModel: HomeViewModel) {
                 }
 
                 loadState.refresh is LoadState.Error || loadState.append is LoadState.Error -> {
-                    item {
+                    item(span = StaggeredGridItemSpan.FullLine) {
                         Text(text = "Error")
                     }
                 }
@@ -182,7 +399,7 @@ fun displayList(viewModel: HomeViewModel) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Search(viewModel: HomeViewModel, onSearch: () -> Unit, onFilter: () -> Unit) {
-
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -198,10 +415,11 @@ fun Search(viewModel: HomeViewModel, onSearch: () -> Unit, onFilter: () -> Unit)
             },
             onSearch = {
                 onSearch()
+                keyboardController?.hide()
             },
             active = false,
             onActiveChange = {},
-            placeholder = { Text("search recipies") },
+            placeholder = { Text("search recipes") },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
             trailingIcon = {
                 if (viewModel.searchtext.isNotEmpty()) {
@@ -238,7 +456,6 @@ fun itemView(recipe: Recipe) {
             loading = placeholder(R.drawable.placeholder),
             failure = placeholder(R.drawable.placeholder),
             contentScale = ContentScale.FillBounds,
-
             modifier = Modifier
                 .size(200.dp)
                 .align(Alignment.Center)
@@ -252,10 +469,7 @@ fun itemView(recipe: Recipe) {
                         drawContent()
                         drawRect(gradient, blendMode = BlendMode.Multiply)
                     }
-                }) {
-            it
-
-        }
+                }) { it }
         Text(
             text = recipe.label, modifier = Modifier
                 .align(Alignment.BottomStart)
