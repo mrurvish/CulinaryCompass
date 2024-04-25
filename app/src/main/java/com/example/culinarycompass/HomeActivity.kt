@@ -4,7 +4,6 @@ package com.example.culinarycompass
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,28 +26,39 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ElevatedFilterChip
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,8 +69,13 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
@@ -69,25 +84,23 @@ import com.bumptech.glide.integration.compose.placeholder
 import com.example.culinarycompass.Viewmodels.HomeViewModel
 import com.example.culinarycompass.data.ApiParams
 import com.example.culinarycompass.data.Recipe
-import com.example.culinarycompass.data.SearchResult
 import com.example.culinarycompass.ui.theme.EdesOrdoTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class HomeActivity : ComponentActivity() {
-    private val viewModel: HomeViewModel by viewModels()
-
-    @OptIn(ExperimentalMaterial3Api::class)
+    // private val viewModel: HomeViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.getrecipes()
+
         setContent {
 
             EdesOrdoTheme {
 
 
-                Bottomsheet(viewModel)
+                MyApp()
 
 
             }
@@ -98,23 +111,26 @@ class HomeActivity : ComponentActivity() {
 }
 
 @Composable
-fun MyApp(viewModel: HomeViewModel, onFilter: () -> Unit) {
-    // A surface container using the 'background' color from the theme
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        Column {
-            Search(viewModel = viewModel, { viewModel.getrecipes() }, onFilter = { onFilter() })
-            DisplayList(viewModel = viewModel)
+fun MyApp(viewModel: HomeViewModel = hiltViewModel()) {
+    viewModel.getrecipes()
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = "Home") {
+        composable(route = "Home") {
+            HomeScreen(viewModel = viewModel)
+        }
+        composable(route = "Notification") {
+
+        }
+        composable(route = "Help") {
 
         }
     }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Bottomsheet(viewModel: HomeViewModel) {
+fun HomeScreen(viewModel: HomeViewModel) {
     val bottomSheetState = rememberBottomSheetScaffoldState(
         bottomSheetState = SheetState(
             initialValue = SheetValue.Hidden,
@@ -135,11 +151,20 @@ fun Bottomsheet(viewModel: HomeViewModel) {
             }
         }, sheetPeekHeight = 0.dp
     ) {
-        MyApp(viewModel, onFilter = {
-            scop.launch {
-                bottomSheetState.bottomSheetState.expand()
+        Column {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.background
+            ) {
+                Search(viewModel = viewModel, { viewModel.getrecipes() }, onFilter = {
+                    scop.launch {
+                        bottomSheetState.bottomSheetState.expand()
+                    }
+                })
+                DisplayList(viewModel = viewModel)
+
             }
-        })
+        }
     }
     /*  LaunchedEffect(bottomSheetState) {
           snapshotFlow { bottomSheetState.bottomSheetState.isVisible }.collect { isVisible ->
@@ -181,7 +206,7 @@ fun BottomsheetContent(viewModel: HomeViewModel, OnDismiss: () -> Unit = {}) {
                     .clickable { OnDismiss() },
             )
         }
-Spacer(modifier = Modifier.size(4.dp))
+        Spacer(modifier = Modifier.size(4.dp))
         Text(text = "Meal :")
         ChipGroupitemview(ApiParams().meals, onChipDisselected = {
 
@@ -195,18 +220,18 @@ Spacer(modifier = Modifier.size(4.dp))
             selectedmealtype.value = oldlist
         }, selectedchips = selectedmealtype)
         Spacer(modifier = Modifier.size(4.dp))
-            Text(text = "Diet :")
-            ChipGroupitemview(ApiParams().diet, onChipDisselected = {
+        Text(text = "Diet :")
+        ChipGroupitemview(ApiParams().diet, onChipDisselected = {
 
-                val oldlist = selecteddiet.value.toMutableList()
-                oldlist.remove(it)
-                selecteddiet.value = oldlist
-            }, onChipSelected = {
+            val oldlist = selecteddiet.value.toMutableList()
+            oldlist.remove(it)
+            selecteddiet.value = oldlist
+        }, onChipSelected = {
 
-                val oldlist = selecteddiet.value.toMutableList()
-                oldlist.add(it)
-                selecteddiet.value = oldlist
-            }, selectedchips = selecteddiet)
+            val oldlist = selecteddiet.value.toMutableList()
+            oldlist.add(it)
+            selecteddiet.value = oldlist
+        }, selectedchips = selecteddiet)
 
         Spacer(modifier = Modifier.size(4.dp))
         Text(text = "Cuisine :")
@@ -251,7 +276,8 @@ Spacer(modifier = Modifier.size(4.dp))
         Row(
             modifier = Modifier
                 .align(Alignment.Start)
-                .fillMaxWidth().padding(4.dp),
+                .fillMaxWidth()
+                .padding(4.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -478,4 +504,74 @@ fun itemView(recipe: Recipe) {
 
     }
 
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview
+@Composable
+fun drawer() {
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Open)
+    val scope = rememberCoroutineScope()
+    ModalNavigationDrawer(drawerState = drawerState,
+        drawerContent = { Drawercontent(drawerState, scope) }) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Scaffold(topBar = {
+                TopAppBar(title = {
+                    Text(text = "My App")
+                }, navigationIcon = {
+                    IconButton(onClick = {
+                        scope.launch {
+                            drawerState.open()
+                        }
+                    }) {
+                        Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu")
+                    }
+                })
+            }) { padding ->
+                Surface(modifier = Modifier.padding(padding)) {
+                    Text(text = "hello")
+                }
+
+            }
+        }
+    }
+}
+
+@Composable
+fun Drawercontent(drawerState: DrawerState, scope: CoroutineScope) {
+    var selectedItemIndex by rememberSaveable {
+        mutableStateOf(0)
+    }
+    ModalDrawerSheet(modifier = Modifier.padding(end = 50.dp)) {
+        Spacer(modifier = Modifier.height(30.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Logo()
+        }
+        Spacer(modifier = Modifier.height(30.dp))
+        ApiParams().items.forEachIndexed { index, drawerItem ->
+            NavigationDrawerItem(label = {
+                Text(text = drawerItem.title)
+            }, selected = index == selectedItemIndex, onClick = {
+                selectedItemIndex = index
+                scope.launch {
+                    drawerState.close()
+                }
+            }, icon = {
+                Icon(
+                    imageVector = if (index == selectedItemIndex) {
+                        drawerItem.selectedIcon
+                    } else drawerItem.unselectedIcon,
+                    contentDescription = drawerItem.title
+                )
+            },
+                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+            )
+        }
+    }
 }

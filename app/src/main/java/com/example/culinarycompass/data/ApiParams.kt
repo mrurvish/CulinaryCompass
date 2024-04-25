@@ -1,5 +1,14 @@
 package com.example.culinarycompass.data
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.ui.graphics.vector.ImageVector
+
 class ApiParams (){
     val diet: List<String> = listOf(
         "balanced",
@@ -95,4 +104,27 @@ class ApiParams (){
         "vegan",
         "wheat-free"
     )
+    val items = listOf(
+        DrawerItem(
+            title = "Home",
+            selectedIcon = Icons.Filled.Home,
+            unselectedIcon = Icons.Outlined.Home,
+        ),
+        DrawerItem(
+            title = "Notification",
+            selectedIcon = Icons.Filled.Info,
+            unselectedIcon = Icons.Outlined.Info,
+
+        ),
+        DrawerItem(
+            title = "Favorites",
+            selectedIcon = Icons.Filled.Favorite,
+            unselectedIcon = Icons.Outlined.FavoriteBorder,
+        ),
+    )
+
+
+}
+data class DrawerItem(val title: String, val selectedIcon: ImageVector, val unselectedIcon: ImageVector) {
+
 }
