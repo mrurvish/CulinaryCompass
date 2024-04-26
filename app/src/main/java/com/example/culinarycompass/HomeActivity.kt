@@ -69,10 +69,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -113,21 +113,91 @@ class HomeActivity : ComponentActivity() {
 @Composable
 fun MyApp(viewModel: HomeViewModel = hiltViewModel()) {
     viewModel.getrecipes()
-    val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "Home") {
-        composable(route = "Home") {
-            HomeScreen(viewModel = viewModel)
-        }
-        composable(route = "Notification") {
 
-        }
-        composable(route = "Help") {
-
-        }
-    }
+        MainDrawer(viewModel = viewModel)
 
 }
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MainDrawer(navController: NavHostController = rememberNavController(), viewModel: HomeViewModel) {
 
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+    ModalNavigationDrawer(drawerState = drawerState,
+        drawerContent = { Drawercontent(drawerState, scope,navController) }) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Scaffold(topBar = {
+                TopAppBar(title = {
+                    Text(text = "My App")
+                }, navigationIcon = {
+                    IconButton(onClick = {
+                        scope.launch {
+                            drawerState.open()
+                        }
+                    }) {
+                        Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu")
+                    }
+                })
+            }) { padding ->
+                Surface(modifier = Modifier.padding(padding)) {
+
+                    NavHost(navController = navController, startDestination = "Home") {
+                        composable(route = "Home") {
+                            // HomeScreen(viewModel = viewModel)
+                            HomeScreen(viewModel = viewModel)
+                        }
+                        composable(route = "Notification") {
+                            Text(text = "Notification")
+                        }
+                        composable(route = "Favorites") {
+                            Text(text = "Favorites")
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+}
+@Composable
+fun Drawercontent(drawerState: DrawerState, scope: CoroutineScope, navController: NavHostController) {
+    var selectedItemIndex by rememberSaveable {
+        mutableStateOf(0)
+    }
+    ModalDrawerSheet(modifier = Modifier.padding(end = 50.dp)) {
+        Spacer(modifier = Modifier.height(30.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Logo()
+        }
+        Spacer(modifier = Modifier.height(30.dp))
+        ApiParams().items.forEachIndexed { index, drawerItem ->
+            NavigationDrawerItem(label = {
+                Text(text = drawerItem.title)
+            }, selected = index == selectedItemIndex, onClick = {
+                selectedItemIndex = index
+                scope.launch {
+                    drawerState.close()
+                    navController.navigate(ApiParams().items.get(selectedItemIndex).title)
+                }
+            }, icon = {
+                Icon(
+                    imageVector = if (index == selectedItemIndex) {
+                        drawerItem.selectedIcon
+                    } else drawerItem.unselectedIcon,
+                    contentDescription = drawerItem.title
+                )
+            },
+                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+            )
+        }
+    }
+}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(viewModel: HomeViewModel) {
@@ -156,13 +226,16 @@ fun HomeScreen(viewModel: HomeViewModel) {
                 modifier = Modifier.fillMaxSize(),
                 color = MaterialTheme.colorScheme.background
             ) {
-                Search(viewModel = viewModel, { viewModel.getrecipes() }, onFilter = {
-                    scop.launch {
-                        bottomSheetState.bottomSheetState.expand()
-                    }
-                })
-                DisplayList(viewModel = viewModel)
+                Column {
 
+
+                    Search(viewModel = viewModel, { viewModel.getrecipes() }, onFilter = {
+                        scop.launch {
+                            bottomSheetState.bottomSheetState.expand()
+                        }
+                    })
+                    DisplayList(viewModel = viewModel)
+                }
             }
         }
     }
@@ -506,72 +579,5 @@ fun itemView(recipe: Recipe) {
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview
-@Composable
-fun drawer() {
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Open)
-    val scope = rememberCoroutineScope()
-    ModalNavigationDrawer(drawerState = drawerState,
-        drawerContent = { Drawercontent(drawerState, scope) }) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            Scaffold(topBar = {
-                TopAppBar(title = {
-                    Text(text = "My App")
-                }, navigationIcon = {
-                    IconButton(onClick = {
-                        scope.launch {
-                            drawerState.open()
-                        }
-                    }) {
-                        Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu")
-                    }
-                })
-            }) { padding ->
-                Surface(modifier = Modifier.padding(padding)) {
-                    Text(text = "hello")
-                }
 
-            }
-        }
-    }
-}
 
-@Composable
-fun Drawercontent(drawerState: DrawerState, scope: CoroutineScope) {
-    var selectedItemIndex by rememberSaveable {
-        mutableStateOf(0)
-    }
-    ModalDrawerSheet(modifier = Modifier.padding(end = 50.dp)) {
-        Spacer(modifier = Modifier.height(30.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Logo()
-        }
-        Spacer(modifier = Modifier.height(30.dp))
-        ApiParams().items.forEachIndexed { index, drawerItem ->
-            NavigationDrawerItem(label = {
-                Text(text = drawerItem.title)
-            }, selected = index == selectedItemIndex, onClick = {
-                selectedItemIndex = index
-                scope.launch {
-                    drawerState.close()
-                }
-            }, icon = {
-                Icon(
-                    imageVector = if (index == selectedItemIndex) {
-                        drawerItem.selectedIcon
-                    } else drawerItem.unselectedIcon,
-                    contentDescription = drawerItem.title
-                )
-            },
-                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-            )
-        }
-    }
-}
