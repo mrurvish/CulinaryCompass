@@ -10,6 +10,7 @@ dependancy implemented
 - okhttp3
 - compose
 - material3
+- Glide
 
   
 api usage ->
