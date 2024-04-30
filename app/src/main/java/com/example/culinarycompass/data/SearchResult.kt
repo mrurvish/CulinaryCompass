@@ -1,16 +1,17 @@
 package com.example.culinarycompass.data
 
 import com.squareup.moshi.Json
+import java.io.Serializable
 
 
 data class Links(
     @field:Json(name = "self") val self: Link, @field:Json(name = "next") val next: Link
-)
+): Serializable
 
 
 data class Link(
     @field:Json(name = "href") val href: String, @field:Json(name = "title") val title: String
-)
+): Serializable
 
 
 data class Images(
@@ -18,14 +19,14 @@ data class Images(
     @field:Json(name = "SMALL") val small: Image,
     @field:Json(name = "REGULAR") val regular: Image,
     @field:Json(name = "LARGE") val large: Image
-)
+): Serializable
 
 
 data class Image(
     @field:Json(name = "url") val url: String,
     @field:Json(name = "width") val width: Int,
     @field:Json(name = "height") val height: Int
-)
+): Serializable
 
 
 data class Ingredient(
@@ -34,29 +35,30 @@ data class Ingredient(
     @field:Json(name = "measure") val measure: String,
     @field:Json(name = "food") val food: String,
     @field:Json(name = "weight") val weight: Double,
-    @field:Json(name = "foodId") val foodId: String
-)
+    @field:Json(name = "foodId") val foodId: String,
+    @field:Json(name = "image") val image:String
+): Serializable
 
 
 data class TotalNutrients(
     @field:Json(name = "additionalProp1") val additionalProp1: Nutrient,
     @field:Json(name = "additionalProp2") val additionalProp2: Nutrient,
     @field:Json(name = "additionalProp3") val additionalProp3: Nutrient
-)
+): Serializable
 
 
 data class Nutrient(
     @field:Json(name = "label") val label: String,
     @field:Json(name = "quantity") val quantity: Double,
     @field:Json(name = "unit") val unit: String
-)
+): Serializable
 
 
 data class TotalDaily(
     @field:Json(name = "additionalProp1") val additionalProp1: Nutrient,
     @field:Json(name = "additionalProp2") val additionalProp2: Nutrient,
     @field:Json(name = "additionalProp3") val additionalProp3: Nutrient
-)
+): Serializable
 
 
 data class Digest(
@@ -68,7 +70,7 @@ data class Digest(
     @field:Json(name = "daily") val daily: Double,
     @field:Json(name = "unit") val unit: String,
 
-    )
+    ): Serializable
 
 
 data class Recipe(
@@ -88,7 +90,7 @@ data class Recipe(
     @field:Json(name = "calories") val calories: Double,
     @field:Json(name = "glycemicIndex") val glycemicIndex: Double,
     @field:Json(name = "inflammatoryIndex") val inflammatoryIndex: Double,
-   // @field:Json(name = "totalCO2Emissions") val totalCO2Emissions: Double,
+    @field:Json(name = "totalTime") val totaltime: Double,
     @field:Json(name = "co2EmissionsClass") val co2EmissionsClass: String,
     @field:Json(name = "totalWeight") val totalWeight: Double,
     @field:Json(name = "cuisineType") val cuisineType: List<String>,
@@ -100,7 +102,7 @@ data class Recipe(
     @field:Json(name = "totalNutrients") val totalNutrients: TotalNutrients,
     @field:Json(name = "totalDaily") val totalDaily: TotalDaily,
     @field:Json(name = "digest") val digest: List<Digest>
-)
+): Serializable
 
 
 data class SearchResult(
@@ -116,7 +118,7 @@ data class SearchResult(
 data class Hit(
     @field:Json(name = "recipe") val recipe: Recipe,
     @field:Json(name = "_links") val links: Links
-)
+): Serializable
 
 
 data class Error(

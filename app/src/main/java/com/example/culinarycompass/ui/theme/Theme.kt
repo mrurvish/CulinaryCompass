@@ -44,7 +44,7 @@ onSurface = Color.Black
 )
 
 @Composable
-fun EdesOrdoTheme(
+fun CulinaryCompassTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,

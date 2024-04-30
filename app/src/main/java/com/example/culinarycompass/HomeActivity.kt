@@ -1,6 +1,7 @@
 package com.example.culinarycompass
 
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -68,6 +69,7 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -84,7 +86,9 @@ import com.bumptech.glide.integration.compose.placeholder
 import com.example.culinarycompass.Viewmodels.HomeViewModel
 import com.example.culinarycompass.data.ApiParams
 import com.example.culinarycompass.data.Recipe
-import com.example.culinarycompass.ui.theme.EdesOrdoTheme
+import com.example.culinarycompass.ui.theme.CulinaryCompassTheme
+
+
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -97,10 +101,10 @@ class HomeActivity : ComponentActivity() {
 
         setContent {
 
-            EdesOrdoTheme {
+            CulinaryCompassTheme {
 
 
-                MyApp()
+               MyApp()
 
 
             }
@@ -453,7 +457,7 @@ fun ChipGroupitemview(
 
 @Composable
 fun DisplayList(viewModel: HomeViewModel) {
-
+val context = LocalContext.current
     val data = viewModel.recepiResponse.collectAsLazyPagingItems()
 //    Log.d("size", data?.size.toString())
     LazyVerticalStaggeredGrid(
@@ -463,7 +467,12 @@ fun DisplayList(viewModel: HomeViewModel) {
         items(data?.itemCount ?: 0) { recepi ->
             // Composable item for each item in the list
 //            data?.getOrNull(recepi)?.recipe?.let { itemView(recipe = it) }
-            data[recepi]?.recipe?.let { itemView(recipe = it) }
+            data[recepi]?.recipe?.let { itemView(recipe = it) {
+//start activity and pass data
+                val intent = Intent(context, RecipeActivity::class.java)
+                intent.putExtra("recipe", it)
+                context.startActivity(intent)
+            } }
         }
 
         data.apply {
@@ -543,18 +552,19 @@ fun Search(viewModel: HomeViewModel, onSearch: () -> Unit, onFilter: () -> Unit)
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun itemView(recipe: Recipe) {
+fun itemView(recipe: Recipe,onItemclick:(Recipe) -> Unit) {
     Box(
         modifier = Modifier
             .padding(4.dp)
             .clip(RoundedCornerShape(16.dp))
+            .clickable { onItemclick(recipe) }
     ) {
 
         GlideImage(model = recipe.image,
             contentDescription = "",
             loading = placeholder(R.drawable.placeholder),
             failure = placeholder(R.drawable.placeholder),
-            contentScale = ContentScale.FillBounds,
+            contentScale = ContentScale.Crop,
             modifier = Modifier
                 .size(200.dp)
                 .align(Alignment.Center)

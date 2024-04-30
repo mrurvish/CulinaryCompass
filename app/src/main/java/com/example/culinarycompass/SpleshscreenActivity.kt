@@ -24,7 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.culinarycompass.ui.theme.EdesOrdoTheme
+import com.example.culinarycompass.ui.theme.CulinaryCompassTheme
 
 class SpleshscreenActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,7 +35,7 @@ class SpleshscreenActivity : ComponentActivity() {
             WindowManager.LayoutParams.FLAG_FULLSCREEN
         )
         setContent {
-            EdesOrdoTheme {
+            CulinaryCompassTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -79,7 +79,7 @@ fun spleshscreen() {
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
-    EdesOrdoTheme {
+    CulinaryCompassTheme {
         spleshscreen()
     }
 }

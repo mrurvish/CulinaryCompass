@@ -51,7 +51,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.culinarycompass.Viewmodels.LoginViewModel
-import com.example.culinarycompass.ui.theme.EdesOrdoTheme
+import com.example.culinarycompass.ui.theme.CulinaryCompassTheme
+import com.example.culinarycompass.ui.theme.CulinaryCompassTheme
 
 
 
@@ -60,7 +61,7 @@ class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            EdesOrdoTheme {
+            CulinaryCompassTheme {
                 // A surface container using the 'background' color from the theme
                 MyApp(viewModel)
             }
@@ -241,7 +242,7 @@ fun topscreen() {
 @Composable
 fun MyApp(loginActivity: LoginViewModel) {
 
-    EdesOrdoTheme {
+    CulinaryCompassTheme {
         // A surface container using the 'background' color from the theme
         Surface(
             modifier = Modifier.fillMaxSize(),
