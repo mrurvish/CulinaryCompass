@@ -85,7 +85,7 @@ class LoginActivity : ComponentActivity() {
 
 
 }
-
+@Preview
 @Composable
 fun Logo() {
     Card(
@@ -105,7 +105,7 @@ fun Logo() {
                     color = Color.Black,
                     thickness = 5.dp,
                     modifier = Modifier
-                        .width(50.dp)
+                        .width(95.dp)
 
                 )
             }
@@ -118,7 +118,7 @@ fun Logo() {
                     color = Color.Black,
                     thickness = 5.dp,
                     modifier = Modifier
-                        .width(50.dp)
+                        .width(90.dp)
                 )
                 Spacer(modifier = Modifier.size(3.dp))
                 Text(
@@ -267,7 +267,7 @@ fun MyApp(loginActivity: LoginViewModel) {
 }
 
 
-@Preview(showBackground = true)
+
 @Composable
 fun GreetingPreview3() {
 
